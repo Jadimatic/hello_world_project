@@ -24,19 +24,6 @@ main :: proc() {
 	// Not required, but good practice since many applications will use this to display "about" info.
 	meta_ok := sdl.SetAppMetadata("Example Renderer", "1.0", "https://forum.odin-lang.org")
 
-	loaded_image : ^sdl.Surface = image.Load("sprite_cranberry.png") //NOTE: Figure out how to actually render this
-
-
-
-	{
-	content_bytes, err := os.read_entire_file("content/sprite_cranberry.png", context.allocator)
-	defer delete(content_bytes)
-	
-	// You could also just add this to the main way you display text in your example application too
-	fmt.println("Content: ", content_bytes)
-	}
-
-	
 
 	testdirectory, ok := os.get_working_directory(context.allocator)
 	//testdirectory := os.get_working_directory(context.allocator)
@@ -90,6 +77,19 @@ main :: proc() {
 	fmt.println(add(2, 3))
 	fmt.println(len("This is a test, with a string length of 43."))
 
+	loaded_image : ^sdl.Surface = image.Load("content/sprite_cranberry.png") //NOTE: Figure out how to actually render this
+
+	sprite_cranberry:^sdl.Texture
+    {
+        surface:=image.Load("content/sprite_cranberry.png")
+        ensure(surface!=nil)
+        texture:=sdl.CreateTextureFromSurface(renderer,surface)
+        ensure(surface!=nil)
+        sprite_cranberry=texture
+    }
+    defer sdl.DestroyTexture(sprite_cranberry)
+
+
 
 	// Main loop
 	main_loop: for {
@@ -126,6 +126,11 @@ main :: proc() {
 		// Draw new colored frame
 		sdl.SetRenderDrawColor(renderer, 0x08, 0x04, 0x02, 255)
 		sdl.RenderClear(renderer)
+
+		//Draw Sprite Cranberry
+		texture_source_rect := sdl.FRect{0, 0, 1500, 1500}
+		destination_rect := sdl.FRect{225, 225, 245, 245}
+		sdl.RenderTexture(renderer,sprite_cranberry, &texture_source_rect, &destination_rect)
 
 		// Set font color and some debug text
 		r: f32 // mini row iterator
